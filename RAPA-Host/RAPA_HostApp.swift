@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct RAPA_HostApp: App {
+    @StateObject private var sessionManager = SessionManager()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().environmentObject(sessionManager)
         }
     }
 }

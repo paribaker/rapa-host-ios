@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		26B3AD5F2D07498600F55492 /* ExpenseSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26B3AD5E2D07498600F55492 /* ExpenseSheet.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		263B455F2CFC10A2009B8A09 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -31,7 +27,6 @@
 		263B454E2CFC10A1009B8A09 /* RAPA-Host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RAPA-Host.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		263B455E2CFC10A2009B8A09 /* RAPA-HostTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RAPA-HostTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		263B45682CFC10A2009B8A09 /* RAPA-HostUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RAPA-HostUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		26B3AD5E2D07498600F55492 /* ExpenseSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ExpenseSheet.swift; path = "RAPA-Host/Views/ExpenseSheet.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,7 +75,6 @@
 		263B45452CFC10A1009B8A09 = {
 			isa = PBXGroup;
 			children = (
-				26B3AD5E2D07498600F55492 /* ExpenseSheet.swift */,
 				263B45502CFC10A1009B8A09 /* RAPA-Host */,
 				263B45612CFC10A2009B8A09 /* RAPA-HostTests */,
 				263B456B2CFC10A2009B8A09 /* RAPA-HostUITests */,
@@ -242,7 +236,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26B3AD5F2D07498600F55492 /* ExpenseSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct MainView: View {
+    @EnvironmentObject var session: SessionManager
+    @StateObject var expenseVM: ExpenseViewModel = ExpenseViewModel()
     var body: some View {
         NavigationView {
             VStack {
-                NavigationLink(destination: ExpensesView()) {
+                NavigationLink(destination: ExpensesView().environmentObject(expenseVM)) {
                     Text("Expenses")
                         .font(.headline)
                         .padding()
@@ -34,6 +36,9 @@ struct MainView: View {
                 }
                 
                 Spacer()
+            Button("Logout") {
+                session.logOut()
+                }
             }
             .navigationTitle("Main Menu")
         }

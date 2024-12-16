@@ -25,30 +25,7 @@ class ApiService: NSObject {
         self.baseUrl = baseUrl
         
     }
-    
-    private  func getUrl(uri: String, params: [String: Any]?)->URL? {
-        var components = URLComponents(string: "\(self.baseUrl)\(uri)")
-        
-        if let params = params {
-            for (p,v) in params {
-                // if there are nulls then remove them
-                components?.queryItems?.append(URLQueryItem(name: p,value: v as? String))
-                
-                
-            }
-            return (components?.url! as? URL)!
-            
-        
-        }else {
-            guard let url = components?.url! else {
-                return nil
-                
-            }
-            return url
-        }
-        
 
-    }
     
     // An instance method to handle common request logic
     private func requestWithBody<R: Decodable>(
@@ -132,6 +109,11 @@ class ApiService: NSObject {
         let statusCode = response.statusCode
         
         switch statusCode {
+        
+        case 401:
+            // this case should always default to logging the user out
+            SessionManager.shared.logOut()
+            completion(nil, nil)
         case 200...299:
             do {
                 let decoder = JSONDecoder()
@@ -166,7 +148,7 @@ class ApiService: NSObject {
                     return
                 }
                 
-                if let errorMessage = parseError(response: json) {
+            if let errorMessage = parseError(response: json as! [String : Any]) {
                     completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
                 }else {
                     completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "ERROR"]))
@@ -187,7 +169,7 @@ class ApiService: NSObject {
         header: [String: Any]?,
         completion: @escaping (_ response: U?, _ error: Error?) -> Void
     ) {
-        let data = ApiService.codableToDict(data: body)
+        let data = codableToDict(data: body)
         requestWithBody(method: .post, uri: uri, body: data, header: header, completion: completion)
     }
     
@@ -197,7 +179,7 @@ class ApiService: NSObject {
         header: [String: Any]?,
         completion: @escaping (_ response: U?, _ error: Error?) -> Void
     ) {
-        let data = ApiService.codableToDict(data: body)
+        let data = codableToDict(data: body)
         requestWithBody(method: .post, uri: uri, body: data, header: header, completion: completion)
     }
     
@@ -216,19 +198,42 @@ class ApiService: NSObject {
 }
 
 extension ApiService {
-    private func parseError(response: Any?) -> String? {
-        
-        if let array = response as? [String?], let firstMessage = array.first {
-            return firstMessage
-            
-        }else if let str = response as? String? {
-            return str
-            
-        }
-        return nil
+    private func parseError(response: [String: Any]) -> String? {
+        return response.values.compactMap { value -> String? in
+            if let messageArray = value as? [String], let firstMessage = messageArray.first {
+                return firstMessage
+            } else if let message = value as? String {
+                return message
+            }
+            return nil
+        }.first ?? "Client error"
     }
     
-    private static func codableToDict<T: Encodable>(data: T)->[String: Any]?{
+    private  func getUrl(uri: String, params: [String: Any]?)->URL? {
+        var components = URLComponents(string: "\(self.baseUrl)\(uri)")
+        
+        if let params = params {
+            for (p,v) in params {
+                // if there are nulls then remove them
+                components?.queryItems?.append(URLQueryItem(name: p,value: v as? String))
+                
+                
+            }
+            return (components?.url! as? URL)!
+            
+        
+        }else {
+            guard let url = components?.url! else {
+                return nil
+                
+            }
+            return url
+        }
+        
+
+    }
+    
+    private func codableToDict<T: Encodable>(data: T)->[String: Any]?{
         do {
             let data = try JSONEncoder().encode(data)
             let jsonObject = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
@@ -241,6 +246,7 @@ extension ApiService {
     }
 
 }
+
 
 
 

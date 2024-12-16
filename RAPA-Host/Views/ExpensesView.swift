@@ -9,22 +9,20 @@ import SwiftUI
 
 
 struct ExpensesView: View {
-    @StateObject var viewModel: ExpenseViewModel = ExpenseViewModel()
+    @EnvironmentObject var viewModel: ExpenseViewModel
     
     var body: some View {
-        
-        
         VStack {
             ScrollView {
                 VStack {
                     ForEach(viewModel.expenses, id: \.self) { expense in
-                        ExpenseRow(expense: expense)
+                        ExpenseRow(expense: expense).environmentObject(viewModel)
                     }
                 }
             }
             Spacer()
             SearchFilterToolbar()
-        }.padding(.horizontal, 10).background(Color.gray).onAppear{
+        }.padding(.horizontal, 10).onAppear{
             viewModel.listExpenses()
         }.sheet(isPresented: $viewModel.showErrorModal) {
             VStack {
@@ -38,39 +36,26 @@ struct ExpensesView: View {
                 }
                 .padding()
             }.presentationDetents([.medium])
-        }
+        }.sheet(isPresented: $viewModel.showCreateExpense){
+            ZStack {
+                VStack {
+                    
+                    CreateExpenseView()
+
+                }
+            }
+        }.navigationBarItems(trailing: Button(action: {
+            viewModel.showCreateExpense.toggle()
+        }) {
+            Image(systemName: "plus")
+                .imageScale(.large)
+        })
 
     }
 }
 
 #Preview {
-    ExpensesView()
+    ExpensesView().environmentObject(ExpenseViewModel())
 }
 
 
-class ExpenseViewModel: ObservableObject {
-    @Published var expenses: [ExpenseShape] = []
-    @Published var page: Int = 1
-    @Published var error = ""
-    @Published var showErrorModal: Bool = false
-    var expenseApi = ExpenseApi()
-    
-    func listExpenses() {
-        expenseApi.listExpenses(params: ["page": page]) { success, message, data in
-            if success {
-                guard let data = data else { return }
-                self.expenses = data.results!
-                
-                
-            }else {
-                self.error = message
-                self.showErrorModal = true
-                
-                
-            }
-        }
-    }
-    
-    
-    
-}

@@ -13,7 +13,7 @@ public struct UserShape: Hashable,Codable {
     public var email: String
     public var firstName: String
     public var lastName: String
-    public var token: String
+    public var token: String?
 
 }
 
@@ -22,3 +22,4 @@ public struct LoginShape: Hashable, Codable {
     public var email: String
     public var password: String
 }
+

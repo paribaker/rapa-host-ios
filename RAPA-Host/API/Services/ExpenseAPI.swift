@@ -9,6 +9,9 @@ import Foundation
 
 class ExpenseApi {
     let expensesUri = "expenses/expense-group/"
+    let reportsUri = "expenses/expense-report/"
+    let expenseCategoryUri = "expenses/category-options/"
+    let expenseCashflowTypeUri = "expenses/cash-flow-type/"
     private let client = ApiService(baseUrl: BASE_URL )
     
     
@@ -51,6 +54,54 @@ class ExpenseApi {
                     completion(true, "", response)
                 }
             }
+        }
+    }
+
+    func listReports(params: [String: Any] = [:], completion: @escaping (_ success: Bool, _ message: String, _ response: PaginatedRes<ReportShape>?) -> Void) {
+        let header:[String: Any] = getAuthHeader ?? [:]
+        self.client.requestGet(uri: self.reportsUri, header: header) { (response: PaginatedRes<ReportShape>?, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "", response)
+                }
+            }
+        }
+    }
+    
+    func listExpenseCategories(params: [String: Any] = [:], completion: @escaping (_ success: Bool, _ message: String, _ response: [[String]]?) -> Void) {
+        let header:[String: Any] = getAuthHeader ?? [:]
+        
+        self.client.requestGet(uri: self.expenseCategoryUri, header: header) { (response: [[String]]?, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "", response)
+                }
+            }
+        }
+    }
+    
+    func listExpenseCashFlowTypes(params: [String: Any] = [:], completion: @escaping (_ success: Bool, _ message: String, _ response: [[String]]?) -> Void) {
+        let header:[String: Any] = getAuthHeader ?? [:]
+        self.client.requestGet(uri: self.expenseCashflowTypeUri, header: header){ (response: [[String]]?, error) in
+           if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "", response)
+                }
+            }
+        
+            
         }
     }
 

@@ -11,6 +11,7 @@ class UserApi {
     let login = "login/"
     let users = "users/"
     let profile = "profiles/"
+    let organizations = "organizations/"
     private let client = ApiService(baseUrl: BASE_URL )
     
     
@@ -54,6 +55,37 @@ class UserApi {
                 }
             }
         }
+    }
+    func listUsers(params: [String: Any] = [:], completion: @escaping (_ success: Bool, _ message: String, _ response: PaginatedRes<UserShape>?) -> Void){
+        let header:[String: Any] = getAuthHeader ?? [:]
+        let endpoint = "\(self.users)"
+        self.client.requestGet(uri: endpoint, header: header ) { (response:PaginatedRes<UserShape>?, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "", response)
+                }
+            }
+        }
+    }
+    
+    func listOrgs(params: [String: Any] = [:], completion: @escaping (_ success: Bool, _ message: String, _ response: PaginatedRes<OrgShape>?) -> Void){
+        let header:[String: Any] = getAuthHeader ?? [:]
+        self.client.requestGet(uri: self.organizations, header: header ) { (response:PaginatedRes<OrgShape>?, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "", response)
+                }
+            }
+        }
+        
     }
 
     

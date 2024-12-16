@@ -15,16 +15,14 @@ import SwiftUI
 
 struct ExpenseRow: View {
     
+    @EnvironmentObject var expenseVM: ExpenseViewModel
     @State var expense: ExpenseShape?
     @State var showDetailSheet = false
     var body: some View {
     
         VStack{
             if let expense {
-               
-                    
                     VStack(alignment: .leading) {
-                        
                         Text(expense.name)
                             .font(.headline)
                             .foregroundColor(.primary)
@@ -32,7 +30,7 @@ struct ExpenseRow: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         HStack {
-                            Text(expense.organization?.uuidString ?? "")
+                            Text(expense.organizationRef?.name ?? "")
                                 .foregroundColor(.secondary)
                             Spacer()
                             Text("\(expense.amountCurrency) \(expense.amount)")
@@ -47,7 +45,7 @@ struct ExpenseRow: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8)).onTapGesture {
                         showDetailSheet = true
                     }.sheet(isPresented: $showDetailSheet){
-                        ExpenseSheet(expense: expense)
+                        ExpenseSheet(expense: expense).environmentObject(expenseVM)
                     }
 
             }else {

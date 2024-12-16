@@ -31,6 +31,7 @@ class SessionManager: ObservableObject {
                 
             }else {
                 UserDefaults.standard.set(nil, forKey: "userAccount")
+               
             }
         }
     }
@@ -38,6 +39,10 @@ class SessionManager: ObservableObject {
     private var token: String? {
         didSet {
             isLoggedIn = token != nil
+            if !isLoggedIn {
+                userAccount = nil
+                UserDefaults.standard.removeObject(forKey: "token")
+            }
         }
     }
     private var account: UserShape? {
@@ -62,7 +67,10 @@ class SessionManager: ObservableObject {
     
     func logIn(userAccount: UserShape) {
         self.account = userAccount
-        self.setToken(userAccount.token)
+        guard let token =  userAccount.token ?? nil else {
+            return
+        }
+        self.setToken(token)
     }
     
     // Method to log out the user
@@ -92,4 +100,3 @@ class SessionManager: ObservableObject {
         
     }
 }
-

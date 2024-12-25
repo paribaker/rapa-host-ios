@@ -19,7 +19,7 @@ class UserApi {
         guard let token = UserDefaults.standard.userAccount?.token else {
             return nil
         }
-        return ["Authroization": "token \(token)"]
+        return ["Authorization": "token \(token)"]
         
     }
     
@@ -40,7 +40,7 @@ class UserApi {
         
     }
     
-    func retreiveUser(id: UUID, completion: @escaping (_ success: Bool, _ message: String, _ response: UserShape?) -> Void) {
+    func retreiveUser(id: String, completion: @escaping (_ success: Bool, _ message: String, _ response: UserShape?) -> Void) {
         let header:[String: Any] = getAuthHeader ?? [:]
         let endpoint = "\(self.users)\(id)"
         

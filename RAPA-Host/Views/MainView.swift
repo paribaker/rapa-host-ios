@@ -13,6 +13,7 @@ struct MainView: View {
     var body: some View {
         NavigationView {
             VStack {
+                Text("Welcome \(UserDefaults.standard.userAccount?.email ?? "N/A")")
                 NavigationLink(destination: ExpensesView().environmentObject(expenseVM)) {
                     Text("Expenses")
                         .font(.headline)

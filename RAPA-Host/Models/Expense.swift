@@ -9,19 +9,19 @@ import Foundation
 
 
 public struct OrganizationShape: Hashable, Codable {
-    public var id: UUID
+    public var id: String
     public var name: String?
 }
 public struct ReportShape: Hashable, Codable {
-    public var id: UUID
+    public var id: String
     public var name: String?
-    public var organization: UUID?
+    public var organization: String?
     public var organizationRef: OrganizationShape?
-    public var expenses: [UUID]?
+    public var expenses: [String]?
 }
 
 public struct ExpenseShape: Hashable, Codable {
-    public var id: UUID
+    public var id: String
     public var name: String
     public var amount: String
     public var amountCurrency: String
@@ -29,23 +29,23 @@ public struct ExpenseShape: Hashable, Codable {
     public var isReimbursable: Bool
     public var isReimbursed: Bool
     public var expenseDate: String
-    public var organization: UUID?
+    public var organization: String?
     public var organizationRef: OrganizationShape?
-    public var receipts: [UUID]?
-    public var reimburseTo: UUID?
+    public var receipts: [String]?
+    public var reimburseTo: String?
     public var reimburseToRef: UserShape?
     public var providedId: String?
     public var category: String?
     public var cashFlowType: String?
     public var receiptsRef: [ReceiptShape]?
-    public var report: UUID?
+    public var report: String?
     public var reportRef: ReportShape?
 
 }
 
 
 public struct ReceiptShape: Hashable, Codable {
-    public var id: UUID?
+    public var id: String?
     public var name: String?
     public var asset: String?
     public var expense: String?
@@ -68,11 +68,11 @@ public struct CreateExpenseShape: Hashable, Codable {
     public var notes: String?
     public var isReimbursable: Bool
     public var expenseDate: String
-    public var organization: UUID?
-    public var receipts: [UUID]?
-    public var reimburseTo: UUID?
+    public var organization: String?
+    public var receipts: [String]?
+    public var reimburseTo: String?
     public var providedId: String?
     public var category: String?
     public var cashFlowType: String?
-    public var report: UUID?
+    public var report: String?
 }

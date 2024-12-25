@@ -95,7 +95,7 @@ struct ExpenseSheet: View {
 }
 
 #Preview {
-    let sampleOrg = OrganizationShape(id: UUID(), name: "Sample Org")
-    let sampleExpense = ExpenseShape(id: UUID(), name: "Some Expense", amount: "100.00", amountCurrency: "COP", notes: "Sample Notes", isReimbursable: true, isReimbursed: true, expenseDate: "12-20-2024", organization: nil, organizationRef: sampleOrg, receipts: nil)
+    let sampleOrg = OrganizationShape(id: String(), name: "Sample Org")
+    let sampleExpense = ExpenseShape(id: String(), name: "Some Expense", amount: "100.00", amountCurrency: "COP", notes: "Sample Notes", isReimbursable: true, isReimbursed: true, expenseDate: "12-20-2024", organization: nil, organizationRef: sampleOrg, receipts: nil)
     ExpenseSheet(expense: sampleExpense)
 }

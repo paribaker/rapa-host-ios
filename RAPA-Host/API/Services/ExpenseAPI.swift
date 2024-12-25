@@ -19,7 +19,7 @@ class ExpenseApi {
         guard let token = UserDefaults.standard.userAccount?.token else {
             return nil
         }
-        return ["Authroization": "token \(token)"]
+        return ["Authorization": "token \(token)"]
         
     }
     
@@ -40,11 +40,27 @@ class ExpenseApi {
         }
     }
     
-    func retreiveExpense(id: UUID, completion: @escaping (_ success: Bool, _ message: String, _ response: UserShape?) -> Void) {
+    func retreiveExpense(id: String, completion: @escaping (_ success: Bool, _ message: String, _ response: UserShape?) -> Void) {
         let header:[String: Any] = getAuthHeader ?? [:]
         let endpoint = "\(self.expensesUri)\(id)"
         
         self.client.requestGet(uri: endpoint, header: header ) { (response: UserShape?, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription, nil)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "", response)
+                }
+            }
+        }
+    }
+    
+    func createExpense(expense: CreateExpenseShape, completion: @escaping (_ success: Bool, _ message: String, _ response: ExpenseShape?) -> Void) {
+        let header:[String: Any] = getAuthHeader ?? [:]
+        
+        self.client.requestPost(uri: self.expensesUri, body: expense, header: header) { (response: ExpenseShape?, error) in
             if let error = error {
                 DispatchQueue.main.async {
                     completion(false, error.localizedDescription, nil)

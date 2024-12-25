@@ -42,7 +42,7 @@ struct ExpensesView: View {
                     
                     CreateExpenseView()
 
-                }
+                }.padding(.horizontal, 10)
             }
         }.navigationBarItems(trailing: Button(action: {
             viewModel.showCreateExpense.toggle()

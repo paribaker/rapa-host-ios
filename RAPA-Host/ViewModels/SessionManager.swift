@@ -25,7 +25,7 @@ class SessionManager: ObservableObject {
     
     @Published var userAccount: UserShape? {
         didSet {
-            if userAccount != nil {
+            if account != nil {
                 UserDefaults.standard.userAccount = account
                 
                 
@@ -47,7 +47,7 @@ class SessionManager: ObservableObject {
     }
     private var account: UserShape? {
         didSet {
-            userAccount = userAccount ?? nil
+            userAccount = account ?? nil
             
         }
     }

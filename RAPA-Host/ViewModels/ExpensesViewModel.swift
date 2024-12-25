@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 import SwiftUI
+import PhotosUI
 
 enum CurrencyOptions: String, CaseIterable {
     case USD
@@ -28,10 +29,19 @@ class ExpenseViewModel: ObservableObject {
     @Published var expenseCashFlowTypes: [[String]] = []
     @Published var showFilePicker: Bool = false
     @Published var selectedFiles: [URL] = []
+    @Published var showDocumentTypeOptions: Bool = false
+    @Published var showImagePicker: Bool = false
+    @Published var selectedImage: PhotosPickerItem?
+    @Published var expenseForm =  CreateExpenseForm()
 
     var expenseApi = ExpenseApi()
     var userApi = UserApi()
     
+    func getCurrencyFormatter(for currency: String) -> NumberFormatter {
+        CurrencyFormatter.formatter(for: currency)
+    }
+
+
     func listExpenses() {
         expenseApi.listExpenses(params: ["page": page]) { success, message, data in
             if success {
@@ -99,9 +109,26 @@ func listCashFlowTypes() {
         }
     }
     
+func createExpense(expense: CreateExpenseShape) {
+        expenseApi.createExpense(expense: expense) { success, message, data in
+            if success {
+                guard let data = data else { return }
+                self.expenses.append(data)
+            }else {
+                self.error = message
+                self.showErrorModal = true
+            }
+        }
+    }
+    
 }
 
 
+func getFormattedDate(date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    return formatter.string(from: date)
+}
 
 class CreateExpenseForm: ObservableObject {
     @Published var name: String = ""
@@ -111,17 +138,24 @@ class CreateExpenseForm: ObservableObject {
     @Published var isReimbursable: Bool = false
     @Published var expenseDate: Date = Date()
     @Published var isReimbursed: Bool = false
-    @Published var organization: UUID? = nil
-    @Published var receipts: [UUID]? = nil
-    @Published var reimburseTo: UUID? = nil
+    @Published var organization: String? = nil
+    @Published var receipts: [String]? = nil
+    @Published var reimburseTo: String? = nil
     @Published var providedId: String = ""
     @Published var category: String? = nil
     @Published var cashFlowType: String? = nil
-    @Published var report: UUID?
+    @Published var report: String?
     
     
-    var currencyFormatter: NumberFormatter {
-        CurrencyFormatter.formatter(for: amountCurrency.rawValue)
+
+    
+    var value: CreateExpenseShape {
+        .init(name: self.name, amount: String(format: "%.2f", self.amount), amountCurrency: self.amountCurrency.rawValue, isReimbursed: self.isReimbursed, notes: self.notes, isReimbursable: self.isReimbursable, expenseDate: getFormattedDate(date: self.expenseDate), organization: self.organization, receipts: self.receipts, reimburseTo: self.reimburseTo, providedId: self.providedId, category: self.category, cashFlowType: self.cashFlowType, report: report)
+        
+    }
+    
+    var isValid: Bool {
+        name.count > 0 && organization != nil && cashFlowType != nil
     }
     
     

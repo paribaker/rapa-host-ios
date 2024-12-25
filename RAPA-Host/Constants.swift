@@ -6,8 +6,8 @@
 //
 
 import Foundation
-let BASE_URL="https://app.rapallc.com/api/"
-//let BASE_URL="https://paribaker.ngrok.io/api/"
+//let BASE_URL="https://app.rapallc.com/api/"
+let BASE_URL="https://paribaker.ngrok.io/api/"
 
 // Strings
 
@@ -21,15 +21,15 @@ let REIMBURSED_STRING = "reimbursed"
 let EXPENSE_STRING = "expense"
 let NAME_STRING = "name"
 let AMOUNT_STRING = "amount"
-let EXPENSE_DATE_STRING = "date"
-let CATEGORY_STRING = "category"
+let EXPENSE_DATE_STRING = "expense date"
+let CATEGORY_STRING = "expense category"
 let NOTE_STRING = "notes"
 let CURRENCY_STRING = "currency"
-let PICK_A_CATEGORY = "Pick a category"
-let PICK_A_CURRENCY = "Pick a currency"
-let PICK_AN_ORG = "Pick an organization"
+let PICK_A_CATEGORY = "pick an expense category"
+let PICK_A_CURRENCY = "pick a currency"
+let PICK_AN_ORG = "pick an organization"
 let ORGANIZATION_STRING = "organization"
-let PICK_A_PERSON = "Pick a person"
+let PICK_A_PERSON = "Pick a person to reimburse"
 let PERSON_STRING = "person"
 let REPORT_STRING = "report"
 let PICK_A_REPORT = "Pick a report"

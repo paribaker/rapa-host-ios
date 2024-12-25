@@ -9,7 +9,7 @@ import Foundation
 
 
 public struct UserShape: Hashable,Codable {
-    public var id: UUID
+    public var id: String
     public var email: String
     public var firstName: String
     public var lastName: String

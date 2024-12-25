@@ -7,6 +7,14 @@
 
 import Foundation
 
+extension JSONEncoder {
+    static var snakeCaseEncoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        return encoder
+    }
+}
+
 enum HTTPMethod: String {
     case post = "post"
     case get = "get"
@@ -61,6 +69,8 @@ class ApiService: NSObject {
         
         if let body = body {
             do {
+                // use snake case for keys
+
                 let jsonData = try JSONSerialization.data(withJSONObject: body)
                 request.httpBody = jsonData
                 request.addValue("application/json", forHTTPHeaderField: "content-type")
@@ -235,7 +245,7 @@ extension ApiService {
     
     private func codableToDict<T: Encodable>(data: T)->[String: Any]?{
         do {
-            let data = try JSONEncoder().encode(data)
+            let data = try JSONEncoder.snakeCaseEncoder.encode(data)
             let jsonObject = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
             return jsonObject as? [String: Any]
         } catch {

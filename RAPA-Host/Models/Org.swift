@@ -8,6 +8,6 @@
 import Foundation
 
 struct OrgShape: Hashable, Codable {
-    var id: UUID
+    var id: String
     var name: String
 }

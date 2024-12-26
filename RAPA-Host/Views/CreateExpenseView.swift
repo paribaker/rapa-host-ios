@@ -112,7 +112,7 @@ struct CreateExpenseView: View {
             }
         }
         
-        Button("Create Expense") {
+        CustomButton(text: "Create Expense", isLoading: $expenseVM.loadingCreateExpense) {
             if expenseVM.expenseForm.isValid {
                 expenseVM.createExpense(expense: expenseVM.expenseForm.value)
             }

@@ -33,6 +33,7 @@ class ExpenseViewModel: ObservableObject {
     @Published var showImagePicker: Bool = false
     @Published var selectedImage: PhotosPickerItem?
     @Published var expenseForm =  CreateExpenseForm()
+    @Published var loadingCreateExpense: Bool = false
 
     var expenseApi = ExpenseApi()
     var userApi = UserApi()
@@ -110,14 +111,17 @@ func listCashFlowTypes() {
     }
     
 func createExpense(expense: CreateExpenseShape) {
+        loadingCreateExpense = true
         expenseApi.createExpense(expense: expense) { success, message, data in
             if success {
                 guard let data = data else { return }
                 self.expenses.append(data)
+                
             }else {
                 self.error = message
                 self.showErrorModal = true
             }
+            self.loadingCreateExpense = false
         }
     }
     

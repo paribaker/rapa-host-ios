@@ -17,6 +17,7 @@ enum HTTPMethod: String {
     case get = "get"
     case patch = "patch"
     case put = "put"
+    case delete = "delete"
 }
 
 
@@ -109,6 +110,10 @@ class ApiService: NSObject {
             // this case should always default to logging the user out
             SessionManager.shared.logOut()
             completion(nil, nil)
+        
+        case 204:
+            completion(nil, nil)
+            
         case 200...299:
             do {
                 let decoder = JSONDecoder()
@@ -187,6 +192,10 @@ class ApiService: NSObject {
         requestWithBody(method: .get, uri: uri, header: headers, params:params, completion: completion)
         
     }
+    func requestDelete(uri: String,header: [String: Any]?=nil, completion: @escaping (_ response: Bool?, _ error: Error?) -> Void){
+        requestWithBody(method: .delete, uri: uri, header: header, completion: completion)
+        
+    }
     
 }
 
@@ -246,7 +255,7 @@ extension ApiService {
             guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted) else {
                 return nil
             }
-            print(String(data: jsonData, encoding: .utf8))
+            print(String(data: jsonData, encoding: .utf8) as Any)
             return jsonData
         default:
             return nil

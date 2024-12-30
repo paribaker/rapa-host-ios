@@ -12,57 +12,60 @@ struct ExpensesView: View {
     @EnvironmentObject var viewModel: ExpenseViewModel
     
     var body: some View {
-      
-            VStack {
+        
+        VStack {
+            if viewModel.loadingExpenses {
+                ProgressView()
+            }else {
                 List {
-                    VStack {
-                        if viewModel.loadingExpenses {
-                            ProgressView()
-                        }else {
-                        ForEach(viewModel.expenses, id: \.self) { expense in
-                            ExpenseRow(expense: expense).environmentObject(viewModel)
-                        }
-                        }
+                    ForEach(viewModel.expenses, id: \.self){ expense in
+                        ExpenseRow(expense: expense).environmentObject(viewModel)
+                    }.onDelete{ indexPath in
 
-                    }
-                }
-                Spacer()
-                SearchFilterToolbar()
-            }.padding(.horizontal, 10).onAppear{
-                if !viewModel.loadingExpenses {
-                    viewModel.listExpenses()
-                }
-                
-            }.sheet(isPresented: $viewModel.showErrorModal) {
-                VStack {
-                    Text("Login Failed")
-                        .font(.headline)
-                        .padding()
-                    Text(viewModel.error)
-                        .padding()
-                    Button("Dismiss") {
-                        viewModel.showErrorModal = false
-                    }
-                    .padding()
-                }.presentationDetents([.medium])
-            }.sheet(isPresented: $viewModel.showCreateExpense){
-                ZStack {
-                    VStack {
+                        let expense = viewModel.expenses[indexPath.first!]
+                        viewModel.deleteExpense(expenseId: expense.id)
                         
-                        CreateExpenseView()
-
-                    }.padding(.horizontal, 10)
+                    }
                 }
-            }.navigationBarItems(trailing: Button(action: {
-                viewModel.showCreateExpense.toggle()
-            }) {
-                Image(systemName: "plus")
-                    .imageScale(.large)
-            })
-
-        }
+            }
+            
+            Spacer()
+            SearchFilterToolbar()
+        }.padding(.horizontal, 10).onAppear{
+            if !viewModel.loadingExpenses {
+                viewModel.listExpenses()
+            }
+            
+        }.sheet(isPresented: $viewModel.showErrorModal) {
+            VStack {
+                Text("Login Failed")
+                    .font(.headline)
+                    .padding()
+                Text(viewModel.error)
+                    .padding()
+                Button("Dismiss") {
+                    viewModel.showErrorModal = false
+                }
+                .padding()
+            }.presentationDetents([.medium])
+        }.sheet(isPresented: $viewModel.showCreateExpense){
+            ZStack {
+                VStack {
+                    
+                    CreateExpenseView().environmentObject(viewModel)
+                    
+                }.padding(.horizontal, 10)
+            }
+        }.navigationBarItems(trailing: Button(action: {
+            viewModel.showCreateExpense.toggle()
+        }) {
+            Image(systemName: "plus")
+                .imageScale(.large)
+        })
         
     }
+    
+}
 
 
 #Preview {

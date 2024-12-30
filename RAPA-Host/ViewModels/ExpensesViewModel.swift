@@ -95,9 +95,23 @@ class ExpenseViewModel: ObservableObject {
                 self.error = message
                 self.showErrorModal = true
             }
-            DispatchQueue.main.async {
                 self.loadingExpenses = false
+            
+        }
+    }
+    
+    func deleteExpense(expenseId: String) {
+        loadingExpenses = true
+        let index = self.expenses.firstIndex(where: { $0.id == expenseId })
+        if index == nil { return }
+        expenseApi.deleteExpense(id: expenseId) { success, message in
+            if success {
+                self.expenses.remove(at: index!)
+                
+            }else {
+                self.error = message
             }
+            self.loadingExpenses = false
         }
     }
     
@@ -158,12 +172,7 @@ class ExpenseViewModel: ObservableObject {
     
     
     func createExpense() {
-        showCreateExpenseSheet = true
         loadingCreateReceipt = true
-        
-        // first upload the receipts
-        // then attach the returned ids to the expense
-        
         if expenseForm.newReceipts.count > 0 {
             expenseApi.createReceipts(receipts: expenseForm.newReceipts){ success, message, data in
                 
@@ -175,12 +184,12 @@ class ExpenseViewModel: ObservableObject {
         completedReceipt.toggle()
         loadingCreateExpense = true
         
-        
-        
         expenseApi.createExpense(expense: expenseForm.modelValue) { success, message, data in
             if success {
                 guard let data = data else { return }
                 self.expenses.append(data)
+//                self.expenseForm = CreateExpenseForm()
+                self.showCreateExpense.toggle()
                 
             }else {
                 self.error = message

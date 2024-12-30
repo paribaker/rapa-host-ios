@@ -6,8 +6,8 @@ import PhotosUI
 
 
 struct CreateExpenseView: View {
-    @StateObject var expenseForm: CreateExpenseForm = CreateExpenseForm()
-    @StateObject var expenseVM: ExpenseViewModel = ExpenseViewModel()
+    // @StateObject var expenseForm: CreateExpenseForm = CreateExpenseForm()
+    @EnvironmentObject var expenseVM: ExpenseViewModel
     @EnvironmentObject var session: SessionManager
     
     
@@ -136,16 +136,12 @@ struct CreateExpenseView: View {
         }
         
         VStack {
-            // Other UI elements
-            
             Text("Selected Files")
                 .font(.headline)
-            List($expenseVM.expenseForm.newReceipts, id: \.self) {
-                Text($0.wrappedValue.asset.name)
+            List($expenseVM.expenseForm.newReceipts, id: \.self, editActions: .delete){
+                Text("\($0.wrappedValue.asset.name)")
             }
-            .frame(height: 200) // Adjust the height as needed
-            
-            // Other UI elements
+            .frame(height: 200)
         }
         .padding()
         

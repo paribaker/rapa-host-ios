@@ -41,6 +41,23 @@ class ExpenseApi {
         }
     }
     
+    func deleteExpense(id: String, completion: @escaping (_ success: Bool, _ message: String) -> Void) {
+        let header:[String: Any] = getAuthHeader ?? [:]
+        let endpoint = "\(self.expensesUri)\(id)/"
+        
+        self.client.requestDelete(uri: endpoint, header: header ) { (response: Bool?, error) in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(false, error.localizedDescription)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(true, "")
+                }
+            }
+        }
+    }
+    
     func retreiveExpense(id: String, completion: @escaping (_ success: Bool, _ message: String, _ response: UserShape?) -> Void) {
         let header:[String: Any] = getAuthHeader ?? [:]
         let endpoint = "\(self.expensesUri)\(id)"

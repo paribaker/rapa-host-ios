@@ -8,6 +8,13 @@
 import Foundation
 
 
+public struct FileShape: Hashable, Codable {
+    public var name: String
+    public var fileType: String
+    public var data: Data
+
+}
+
 public struct OrganizationShape: Hashable, Codable {
     public var id: String
     public var name: String?
@@ -57,6 +64,10 @@ public struct ReceiptShape: Hashable, Codable {
     }
 }
 
+public struct CreateReceiptShape: Hashable, Codable {
+    public var asset: FileShape
+    
+}
 
 
 

@@ -4,15 +4,12 @@
 //
 //  Created by Pari Work Temp on 12/7/24.
 //
-
 import Foundation
 
-extension JSONEncoder {
-    static var snakeCaseEncoder: JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
-        return encoder
-    }
+enum ContentType: String {
+    case json = "application/json"
+    case form = "application/x-www-form-urlencoded"
+    case multipart = "multipart/form-data"
 }
 
 enum HTTPMethod: String {
@@ -24,6 +21,15 @@ enum HTTPMethod: String {
 
 
 
+extension JSONEncoder {
+    static var snakeCaseEncoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        return encoder
+    }
+}
+
+
 
 /// This ApiService manages all server communication through various functions.
 class ApiService: NSObject {
@@ -31,53 +37,32 @@ class ApiService: NSObject {
     
     init(baseUrl: String) {
         self.baseUrl = baseUrl
-        
     }
-
+    
     
     // An instance method to handle common request logic
     private func requestWithBody<R: Decodable>(
         method: HTTPMethod,
         uri: String,
-        body: [String: Any]?=nil,
+        body: Data?=nil,
         header: [String: Any]?=nil,
         params: [String: Any]?=nil,
         completion: @escaping (_ response: R?, _ error: Error?) -> Void
     ) {
         
-
-       
         guard let url = getUrl(uri: uri, params: params) else {
             completion(nil, NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Code Error"]))
             return
         }
         
-        
-        
         var request: URLRequest = {
-
             var _request = URLRequest(url: url)
-//            _request.addValue("application/json", forHTTPHeaderField: "content-type")
-            
             _request.httpMethod = method.rawValue
             return _request
-            
         }()
         
-        
-        
-        
         if let body = body {
-            do {
-                // use snake case for keys
-
-                let jsonData = try JSONSerialization.data(withJSONObject: body)
-                request.httpBody = jsonData
-                request.addValue("application/json", forHTTPHeaderField: "content-type")
-            }
-            catch {}
-            
-            
+            request.httpBody = body
         }
         
         if let header = header {
@@ -119,7 +104,7 @@ class ApiService: NSObject {
         let statusCode = response.statusCode
         
         switch statusCode {
-        
+            
         case 401:
             // this case should always default to logging the user out
             SessionManager.shared.logOut()
@@ -135,8 +120,8 @@ class ApiService: NSObject {
                 if isDebugMode(){
                     if let decodingError = error as? DecodingError{
                         switch decodingError {
-                            case .typeMismatch(_, let c), .valueNotFound(_, let c), .keyNotFound(_, let c), .dataCorrupted(let c):
-                                print(c.debugDescription)
+                        case .typeMismatch(_, let c), .valueNotFound(_, let c), .keyNotFound(_, let c), .dataCorrupted(let c):
+                            print(c.debugDescription)
                             completion(nil, error)
                         @unknown default:
                             print("Unknown Decode Error")
@@ -148,39 +133,38 @@ class ApiService: NSObject {
                 }
                 completion(nil, error)
                 
-
+                
             }
         case 400...499:
             
-                let json = try? JSONSerialization.jsonObject(with: data, options: [])
-                guard let json = json else {
-                    completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "ERROR"]))
-                    return
-                }
-                
+            let json = try? JSONSerialization.jsonObject(with: data, options: [])
+            guard let json = json else {
+                completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "ERROR"]))
+                return
+            }
+            
             if let errorMessage = parseError(response: json as! [String : Any]) {
-                    completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
-                }else {
-                    completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "ERROR"]))
-                }
-                
-
+                completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+            }else {
+                completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "ERROR"]))
+            }
+            
+            
         default:
             completion(nil, NSError(domain: "", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "Server error"]))
         }
     }
     
-
-    
-    // Public instance methods for specific HTTP methods
     func requestPost<T: Encodable, U: Decodable>(
         uri: String,
         body: T?,
         header: [String: Any]?,
         completion: @escaping (_ response: U?, _ error: Error?) -> Void
     ) {
-        let data = codableToDict(data: body)
-        requestWithBody(method: .post, uri: uri, body: data, header: header, completion: completion)
+        let headers = ["Content-Type": "application/json"].merging(header ?? [:]) { (_, new) in new } 
+        requestWithBody(method: .post, uri: uri, body: prepareBody(data: body, contentType: checkContentType(headers: headers)), header: headers, completion: completion)
+        
+        
     }
     
     func requestPatch<T: Encodable, U: Decodable>(
@@ -189,8 +173,8 @@ class ApiService: NSObject {
         header: [String: Any]?,
         completion: @escaping (_ response: U?, _ error: Error?) -> Void
     ) {
-        let data = codableToDict(data: body)
-        requestWithBody(method: .post, uri: uri, body: data, header: header, completion: completion)
+        let headers = ["Content-Type": "application/json"].merging(header ?? [:]) { (_, new) in new }
+        requestWithBody(method: .patch, uri: uri, body: prepareBody(data: body, contentType: checkContentType(headers: headers)), header: headers, completion: completion)
     }
     
     func requestGet<U: Decodable>(
@@ -199,12 +183,11 @@ class ApiService: NSObject {
         header: [String: Any]?=nil,
         completion: @escaping (_ response: U?, _ error: Error?) -> Void
     ) {
+        let headers = ["Content-Type": "application/json"].merging(header ?? [:]) { (_, new) in new }
+        requestWithBody(method: .get, uri: uri, header: headers, params:params, completion: completion)
         
-        
-        requestWithBody(method: .get, uri: uri, header: header, params:params, completion: completion)
-
     }
-
+    
 }
 
 extension ApiService {
@@ -224,23 +207,16 @@ extension ApiService {
         
         if let params = params {
             for (p,v) in params {
-                // if there are nulls then remove them
                 components?.queryItems?.append(URLQueryItem(name: p,value: v as? String))
-                
-                
             }
             return (components?.url! as? URL)!
             
-        
         }else {
             guard let url = components?.url! else {
                 return nil
-                
             }
             return url
         }
-        
-
     }
     
     private func codableToDict<T: Encodable>(data: T)->[String: Any]?{
@@ -254,10 +230,32 @@ extension ApiService {
         }
         
     }
-
+    private func prepareBody<T: Encodable>(data: T, contentType: String)->Data?{
+        
+        switch contentType {
+        case ContentType.multipart.rawValue:
+//            guard let data = codableToDict(data: data) else {
+//                return nil
+//            }
+            return nil
+            
+        case ContentType.json.rawValue:
+            guard let jsonObject = codableToDict(data: data) else {
+                return nil
+            }
+            guard let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted) else {
+                return nil
+            }
+            print(String(data: jsonData, encoding: .utf8))
+            return jsonData
+        default:
+            return nil
+        }
+    
+        
+    }
+    private func checkContentType(headers: [String: Any])->String{
+        return headers["Content-Type"] as? String ?? ContentType.json.rawValue
+    }
+    
 }
-
-
-
-
-//{"id":"6be75115-0602-4a67-9894-511bee4a039d","performance_level":0,"description":"Gas because size social organization system yes tax. Whose price Congress different popular personal. Experience right throw.","media_url":"http://thinknimble.ngrok.io/media/drill_content/6be75115-0602-4a67-9894-511bee4a039d/test.gif","video_url":"http://thinknimble.ngrok.io/media/drill_content/6be75115-0602-4a67-9894-511bee4a039d/test.mp4","performance_category":"de9a2f4a-f35a-42b0-a276-b2a8178217da","performance_category_ref":{"id":"de9a2f4a-f35a-42b0-a276-b2a8178217da","created":"2024-12-05T19:24:36.690311Z","last_edited":"2024-12-05T19:24:36.690313Z","tag":1,"range_tag":"Pm indicate rate small. Ground could support without four outside. Specific reason field tax. The idea place sing since the."}}}

@@ -16,6 +16,7 @@ enum CurrencyOptions: String, CaseIterable {
 }
 
 class ExpenseViewModel: ObservableObject {
+    @Published var loadingExpenses: Bool = false
     @Published var expenses: [ExpenseShape] = []
     @Published var page: Int = 1
     @Published var error = ""
@@ -31,19 +32,61 @@ class ExpenseViewModel: ObservableObject {
     @Published var selectedFiles: [URL] = []
     @Published var showDocumentTypeOptions: Bool = false
     @Published var showImagePicker: Bool = false
-    @Published var selectedImage: PhotosPickerItem?
+    @Published var selectedImages: [PhotosPickerItem] = [] {
+        didSet {
+            loadImages(selectedImages)
+        }
+    }
     @Published var expenseForm =  CreateExpenseForm()
     @Published var loadingCreateExpense: Bool = false
-
+    @Published var showCreateExpenseSheet: Bool = false
+    @Published var loadingCreateReceipt: Bool = false
+    @Published var completedExpense: Bool = false
+    @Published var completedReceipt: Bool = false
+    
     var expenseApi = ExpenseApi()
     var userApi = UserApi()
     
     func getCurrencyFormatter(for currency: String) -> NumberFormatter {
         CurrencyFormatter.formatter(for: currency)
     }
-
-
+    
+    
+    private func loadImages(_ images: [PhotosPickerItem]) {
+        for image in images {
+            
+            image.loadTransferable(type: Data.self) { result in
+                
+                switch result {
+                case .success(let data):
+                    if let data = data, let fileType = image.supportedContentTypes.first?.preferredMIMEType {
+                        
+                        guard let fileExt = UTType(mimeType: fileType) else { return }
+                        let name = image.itemIdentifier?.split(separator: "/").last.map(String.init) ?? UUID().uuidString
+                        let ext = fileExt.preferredFilenameExtension ?? ".jgp"
+                        let fileName = "\(name).\(ext)"
+                        
+                        
+                        let fileShape = FileShape(name: fileName, fileType: fileType, data: data)
+                        
+                        
+                        let receipt = CreateReceiptShape(asset: fileShape)
+                        DispatchQueue.main.async {
+                            self.expenseForm.newReceipts.append(receipt)
+                        }
+                        
+                    }
+                case .failure(let error):
+                    print("Error loading image: \(error.localizedDescription)")
+                }
+            }
+            
+        }
+        
+        
+    }
     func listExpenses() {
+        loadingExpenses = true
         expenseApi.listExpenses(params: ["page": page]) { success, message, data in
             if success {
                 guard let data = data else { return }
@@ -51,6 +94,9 @@ class ExpenseViewModel: ObservableObject {
             }else {
                 self.error = message
                 self.showErrorModal = true
+            }
+            DispatchQueue.main.async {
+                self.loadingExpenses = false
             }
         }
     }
@@ -88,7 +134,7 @@ class ExpenseViewModel: ObservableObject {
         }
     }
     
-func listExpenseCategories() {
+    func listExpenseCategories() {
         expenseApi.listExpenseCategories { success, message, data in
             if success {
                 guard let data = data else { return }
@@ -99,7 +145,7 @@ func listExpenseCategories() {
         }
     }
     
-func listCashFlowTypes() {
+    func listCashFlowTypes() {
         expenseApi.listExpenseCashFlowTypes { success, message, data in
             if success {
                 guard let data = data else { return }
@@ -110,9 +156,28 @@ func listCashFlowTypes() {
         }
     }
     
-func createExpense(expense: CreateExpenseShape) {
+    
+    func createExpense() {
+        showCreateExpenseSheet = true
+        loadingCreateReceipt = true
+        
+        // first upload the receipts
+        // then attach the returned ids to the expense
+        
+        if expenseForm.newReceipts.count > 0 {
+            expenseApi.createReceipts(receipts: expenseForm.newReceipts){ success, message, data in
+                
+                self.expenseForm.receipts = data.map(\.self!)
+            }
+            
+        }
+        loadingCreateReceipt = false
+        completedReceipt.toggle()
         loadingCreateExpense = true
-        expenseApi.createExpense(expense: expense) { success, message, data in
+        
+        
+        
+        expenseApi.createExpense(expense: expenseForm.modelValue) { success, message, data in
             if success {
                 guard let data = data else { return }
                 self.expenses.append(data)
@@ -122,8 +187,10 @@ func createExpense(expense: CreateExpenseShape) {
                 self.showErrorModal = true
             }
             self.loadingCreateExpense = false
+            self.completedExpense.toggle()
         }
     }
+    
     
 }
 
@@ -149,14 +216,50 @@ class CreateExpenseForm: ObservableObject {
     @Published var category: String? = nil
     @Published var cashFlowType: String? = nil
     @Published var report: String?
+    @Published var newReceipts : [CreateReceiptShape] = []
     
     
-
     
-    var value: CreateExpenseShape {
+    
+    var modelValue: CreateExpenseShape {
         .init(name: self.name, amount: String(format: "%.2f", self.amount), amountCurrency: self.amountCurrency.rawValue, isReimbursed: self.isReimbursed, notes: self.notes, isReimbursable: self.isReimbursable, expenseDate: getFormattedDate(date: self.expenseDate), organization: self.organization, receipts: self.receipts, reimburseTo: self.reimburseTo, providedId: self.providedId, category: self.category, cashFlowType: self.cashFlowType, report: report)
         
     }
+    
+    var value: [String:Any?] {
+        [
+            "name": self.name,
+            "amount": String(format: "%.2f", self.amount),
+            "amountCurrency": self.amountCurrency.rawValue,
+            "isReimbursed": self.isReimbursed,
+            "notes": self.notes,
+            "isReimbursable": self.isReimbursable,
+            "expenseDate": getFormattedDate(date: self.expenseDate),
+            "organization": self.organization,
+            "receipts": self.receipts,
+            "reimburseTo": self.reimburseTo,
+            "providedId": self.providedId,
+            "category": self.category,
+            "cashFlowType": self.cashFlowType,
+            "report": self.report
+        ]
+        
+        
+    }
+    
+    func printValue() {
+        do {
+            let json = try JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted])
+            if let string = String(data: json, encoding: .utf8) {
+                print(string)
+            }
+        }catch {
+            print("Failed")
+        }
+        
+    }
+    
+    
     
     var isValid: Bool {
         name.count > 0 && organization != nil && cashFlowType != nil

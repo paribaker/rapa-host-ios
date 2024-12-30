@@ -45,7 +45,6 @@ enum AssetType: String {
 
 
 
-
 func assetType(for extension: AssetExtension?) -> AssetType? {
     switch `extension` {
     case .jpg, .png, .jpeg:

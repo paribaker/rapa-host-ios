@@ -58,5 +58,5 @@ struct ExpenseRow: View {
 }
 
 #Preview {
-    ExpenseRow()
+    ExpenseRow(expenseVM: .init(), expense: sampleExpenseData)
 }

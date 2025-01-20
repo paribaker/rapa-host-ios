@@ -19,13 +19,48 @@ struct ExpensesView: View {
             }else {
                 List {
                     ForEach(viewModel.expenses, id: \.self){ expense in
-                        ExpenseRow(expense: expense).environmentObject(viewModel)
-                    }.onDelete{ indexPath in
+                        ExpenseRow(expense: expense).environmentObject(viewModel).swipeActions(edge: .trailing, allowsFullSwipe: false){
+                            Button{
+                                viewModel.loadExpenseForm(with: expense)
+                                viewModel.showCreateExpense.toggle()
+                            }label:{
+                                Label("Edit", systemImage: "square.and.pencil")
+                                
+                                
+                            }.tint(.blue)
+                            Button{
+                                
+                            } label:{
+                                Label("Share", systemImage: "square.and.arrow.up")
+                            }.tint(.green)
+                            
 
-                        let expense = viewModel.expenses[indexPath.first!]
-                        viewModel.deleteExpense(expenseId: expense.id)
-                        
+                            
+                            
+                        }.swipeActions(edge: .leading, allowsFullSwipe: true){
+                            Button{
+                                
+                                
+                                
+                                viewModel.deleteExpense(expenseId: expense.id)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                            
+                            
+                            .tint(.red)
+                            
+
+                            
+                            
+                        }
                     }
+//                    }.onDelete{ indexPath in
+//
+//                        let expense = viewModel.expenses[indexPath.first!]
+//                        viewModel.deleteExpense(expenseId: expense.id)
+//                        
+//                    }
                 }
             }
             
@@ -48,7 +83,10 @@ struct ExpensesView: View {
                 }
                 .padding()
             }.presentationDetents([.medium])
-        }.sheet(isPresented: $viewModel.showCreateExpense){
+        }.sheet(isPresented: $viewModel.showCreateExpense,onDismiss: {
+            print("dissmissed")
+            viewModel.loadExpenseForm(with: nil)
+        }){
             ZStack {
                 VStack {
                     

@@ -201,6 +201,12 @@ class ExpenseViewModel: ObservableObject {
     }
     
     
+    func loadExpenseForm(with expense: ExpenseShape? = nil) {
+            expenseForm = CreateExpenseForm(expense: expense)
+        
+    }
+    
+    
 }
 
 
@@ -227,11 +233,35 @@ class CreateExpenseForm: ObservableObject {
     @Published var report: String?
     @Published var newReceipts : [CreateReceiptShape] = []
     
-    
+    init(expense: ExpenseShape? = nil) {
+        guard let expense = expense else { return }
+        self.name = expense.name
+        self.amount = Double(expense.amount)!
+        self.amountCurrency = CurrencyOptions(rawValue: expense.amountCurrency)!
+        self.notes = expense.notes ?? ""
+        self.isReimbursable = expense.isReimbursable
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let date = dateFormatter.date(from:expense.expenseDate)!
+        self.expenseDate = date
+        self.organization = expense.organization
+        self.receipts = expense.receipts
+        self.newReceipts = []
+        self.reimburseTo = expense.reimburseTo
+        self.providedId = expense.providedId ?? ""
+        self.category = expense.category
+        self.cashFlowType = expense.cashFlowType
+        self.report = expense.report
+        
+        
+        
+        
+    }
     
     
     var modelValue: CreateExpenseShape {
         .init(name: self.name, amount: String(format: "%.2f", self.amount), amountCurrency: self.amountCurrency.rawValue, isReimbursed: self.isReimbursed, notes: self.notes, isReimbursable: self.isReimbursable, expenseDate: getFormattedDate(date: self.expenseDate), organization: self.organization, receipts: self.receipts, reimburseTo: self.reimburseTo, providedId: self.providedId, category: self.category, cashFlowType: self.cashFlowType, report: report)
+        
         
     }
     

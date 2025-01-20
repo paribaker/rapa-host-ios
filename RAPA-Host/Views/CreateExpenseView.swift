@@ -58,6 +58,7 @@ struct CreateExpenseView: View {
                     }
                 }.onAppear {
                     expenseVM.listOrgs()
+                    
                 }
                 
                 

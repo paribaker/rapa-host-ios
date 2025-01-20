@@ -7,7 +7,7 @@
 
 import Foundation
 //let BASE_URL="https://app.rapallc.com/api/"
-let BASE_URL="https://paribaker.ngrok.io/api/"
+let BASE_URL=ProcessInfo.processInfo.environment["BASE_URL"]! + "/api/"
 
 // Strings
 

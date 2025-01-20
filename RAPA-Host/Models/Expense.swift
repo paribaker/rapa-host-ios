@@ -87,3 +87,6 @@ public struct CreateExpenseShape: Hashable, Codable {
     public var cashFlowType: String?
     public var report: String?
 }
+
+
+let sampleExpenseData: ExpenseShape = ExpenseShape(id: "1", name: "Test Expense", amount: "100",amountCurrency: "COP", notes: "test", isReimbursable: false, isReimbursed: false, expenseDate: "2024-11-30", organization: nil, organizationRef: nil, receipts: [], reimburseTo: nil, reimburseToRef: nil, providedId: "randomId", category: "expense", cashFlowType: "outflow", report: nil, reportRef: nil )
